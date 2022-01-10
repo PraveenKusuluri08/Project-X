@@ -1,0 +1,1 @@
+export const API= window.location.href.includes("http://localhost:3000/")?"http://localhost:5001/fir-realworld-d5b34/us-central1/api": null
