@@ -46,6 +46,7 @@ class Posts {
       likesCount: 0,
       commentsCount: 0,
       isExists: true,
+      uid:this.actionPerformer.uid
     };
     let postDb = db.collection("POSTS").doc();
     return postDb
@@ -101,20 +102,208 @@ class Posts {
       comment: inputs.comment,
       commentedAt: new Date().toISOString(),
       CommenterImageUrl: postCreatorImage,
+      commentLikes: 0,
+      uid: this.actionPerformer.uid,
     };
-   return PostsUtils._is_posts_exists(postId)
+    return PostsUtils._is_posts_exists(postId)
       .then((res) => {
         console.log(res);
-        return db
-          .collection("COMMENT")
-          .add(commentData)
-          .catch((err) => {
-            throw err;
-          });
+        return db.collection("COMMENT").add(commentData);
+      })
+      .then(() => {
+        const FieldValue = admin.firestore.FieldValue;
+        db.collection("POSTS")
+          .doc(postId)
+          .update({ commentsCount: FieldValue.increment(1) });
       })
       .catch((err) => {
         throw err;
       });
+  }
+
+  //TODO:Run a background trigger when someone likes on the post
+
+  async _like_On_Post(postId) {
+    return new Promise((reslove, reject) => {
+      const likes = db
+        .collection("POST-LIKES")
+        .where("email", "==", this.actionPerformer.email)
+        .where("postId", "==", postId)
+        .limit(1);
+
+      const post = db.collection("POSTS").doc(postId);
+      let postData;
+
+      post
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            postData = doc.data();
+            postData.postId = doc.id;
+            return likes.get();
+          } else {
+            reject("Document you are requesting is not exists");
+          }
+        })
+        .then((snap) => {
+          if (snap.empty) {
+            return db
+              .collection("POST-LIKES")
+              .add({
+                postId: postId,
+                email: this.actionPerformer.email,
+                likedAt: new Date().toISOString(),
+                uid: this.actionPerformer.uid,
+              })
+              .then(() => {
+                postData.likesCount++;
+                return post.update({ likesCount: postData.likesCount });
+              })
+              .then(() => {
+                reslove(postData);
+              });
+          } else {
+            reject("Post Already liked");
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+  async _like_On_Comment(commentId) {
+    return new Promise((reslove, reject) => {
+      const likes = db
+        .collection("COMMENT-LIKES")
+        .where("email", "==", this.actionPerformer.email)
+        .where("commentId", "==", commentId)
+        .limit(1);
+
+      const comment = db.collection("COMMENT").doc(commentId);
+      let commentData;
+
+      comment
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            commentData = doc.data();
+            commentData.commentId = doc.id;
+            return likes.get();
+          } else {
+            reject("Document you are requesting is not exists");
+          }
+        })
+        .then((snap) => {
+          if (snap.empty) {
+            return db
+              .collection("COMMENT-LIKES")
+              .add({
+                commentId: commentId,
+                email: this.actionPerformer.email,
+                likedAt: new Date().toISOString(),
+                uid: this.actionPerformer.uid,
+              })
+              .then(() => {
+                commentData.likesCount++;
+                return comment.update({ likesCount: commentData.likesCount });
+              })
+              .then(() => {
+                reslove(commentData);
+              });
+          } else {
+            reject("Comment Already liked");
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+  async _un_like_post(postId) {
+    return new Promise((reslove, reject) => {
+      const likes = db
+        .collection("POST-LIKES")
+        .where("email", "==", this.actionPerformer.email)
+        .where("postId", "==", postId)
+        .limit(1);
+
+      const post = db.collection("POSTS").doc(postId);
+      let postData;
+
+      post
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            postData = doc.data();
+            postData.postId = doc.id;
+            return likes.get();
+          } else {
+            reject("Document you are requesting is not exists");
+          }
+        })
+        .then((snap) => {
+          if (snap.empty) {
+            reject("Like post before unliking");
+          } else {
+            return db
+              .doc(`POST-LIKES/${snap.docs[0].data().id}`)
+              .delete()
+              .then(() => {
+                postData.likesCount--;
+                return post.update({ likesCount: postData.likesCount });
+              })
+              .then(() => {
+                reslove(postData);
+              });
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+  async _un_like_comment(commentId) {
+    return new Promise((reslove, reject) => {
+      const likes = db
+        .collection("COMMENT-LIKES")
+        .where("email", "==", this.actionPerformer.email)
+        .where("commentId", "==", commentId)
+        .limit(1);
+
+      const comment = db.collection("COMMENT").doc(commentId);
+      let commentData;
+
+      comment
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            commentData = doc.data();
+            commentData.commentId = doc.id;
+            return likes.get();
+          } else {
+            reject("Document you are requesting is not exists");
+          }
+        })
+        .then((snap) => {
+          if (snap.empty) {
+            reject("Like comment before unliking");
+          } else {
+            return db
+              .doc(`COMMENT-LIKES/${snap.docs[0].data().id}`)
+              .delete()
+              .then(() => {
+                commentData.likesCount--;
+                return comment.update({ likesCount: commentData.likesCount });
+              })
+              .then(() => {
+                reslove(commentData);
+              });
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 }
 

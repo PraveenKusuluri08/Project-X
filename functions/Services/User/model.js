@@ -38,7 +38,7 @@ class User {
         if (doc.exists) {
           user["creds"] = doc.data();
           return db
-            .collection("LIKES")
+            .collection("POST-LIKES")
             .where("email", "==", this.actionPerformer.email)
             .get();
         }
@@ -89,6 +89,9 @@ class User {
         throw err;
       });
   }
+
+  //TODO: soft delete of the user account
+  //TODO: Disable all the services and authentication until unless user retrive their comment
 }
 
 module.exports = User;

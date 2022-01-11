@@ -4,7 +4,7 @@ const {
   validationCreateUser,
   checkUpdateFieldsIsEmpty,
 } = require("../../helpers/utils");
-const {endPoint} = require("../../endpoint");
+const { endPoint } = require("../../endpoint");
 const uploadImage = require("../../helpers/imageUpload");
 
 //signUp
@@ -48,7 +48,17 @@ router.post("/createuser", (req, res) => {
 
 router.post("/user/uploadimage", endPoint, uploadImage);
 
-//add another route which is used to delete the account
-// if user requested to delete his accout it needs run trigger for 
-// 10 days and after completion of 15 it changes to disable to delete accout perminently
+router.delete("/user/deleteaccount", endPoint, async (req, res) => {
+
+  const obj = new Model(req.user);
+  try {
+    let authDelete = await obj._deleteUserAccount();
+    console.log(authDelete);
+    return res.status(200).json({ authDelete });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json(err);
+  }
+});
+
 module.exports = router;

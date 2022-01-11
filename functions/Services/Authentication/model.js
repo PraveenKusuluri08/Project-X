@@ -18,13 +18,13 @@ class Model {
       })
       .then(() => {
         const inputData = {};
-       
+
         Object.entries(inputs).forEach(([key, value]) => {
-            if(key!=="password") inputData[key]=value
+          if (key !== "password") inputData[key] = value;
         });
 
         console.log(inputData);
-        
+
         const startImage = "cover.jpg";
         return db
           .collection("USERS")
@@ -40,6 +40,47 @@ class Model {
       .catch((err) => {
         throw err;
       });
+  }
+
+  //hard delete of the account
+  async _deleteUserAccount() {
+    return new Promise((resolve, reject) => {
+      const { uid } = this.actionPerformer;
+      console.log(uid);
+      const postsData = db.collection("POSTS").where("uid", "==", uid);
+      const commentsRef = db.collection("COMMENT").where("uid", "==", uid);
+      return AuthUtils._userExists(uid)
+        .then(() => {
+          admin
+            .auth()
+            .deleteUser(uid)
+            .then(() => {
+              return db.collection("USERS").doc(uid).delete();
+            })
+            .then(() => {
+              return postsData.get().then((snap) => {
+                snap.forEach((doc) => {
+                  doc.ref.delete();
+                });
+              });
+            })
+            .then(() => {
+              return commentsRef.get().then((snap) => {
+                snap.forEach(({ref }) => {
+                  ref.delete();
+                });
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+              reject("Failed to delete posts of user");
+            });
+          resolve("User accout delete permanently");
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 }
 
