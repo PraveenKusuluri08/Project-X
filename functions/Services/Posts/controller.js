@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { endPoint, getIdToken } = require("../../endpoint");
 const { checkCreatePost } = require("../../helpers/utils");
 const Posts = require("./model");
+
 router.get("/getallposts", endPoint, (req, res) => {
   const obj = new Posts(req.user);
   try {
@@ -37,7 +38,8 @@ router.post("/createpost", getIdToken, (req, res) => {
   }
   obj
     .createPost(req.body)
-    .then(() => {
+    .then((post) => {
+      console.log("post", post);
       return res.status(202).json({ message: "Post created successfully" });
     })
     .catch((err) => {
@@ -69,7 +71,7 @@ router.post("/:postId/commentOnPost", getIdToken, (req, res) => {
   obj
     ._do_Comment(inputs, postId)
     .then((responce) => {
-      console.log(responce)
+      console.log(responce);
       return res.status(202).json({ message: "Commented successfully" });
     })
     .catch((err) => {
@@ -78,6 +80,52 @@ router.post("/:postId/commentOnPost", getIdToken, (req, res) => {
     });
 });
 
+router.post("/likeonpost", getIdToken, async (req, res) => {
+  const { postId } = req.query;
+  const obj = new Posts(req.user);
+  try {
+    let likes = await obj._like_On_Post(postId);
+    return res.status(200).json(likes);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ error: error });
+  }
+});
+
+router.post("/likeoncomment", getIdToken, async (req, res) => {
+  const { commentId } = req.query;
+  const obj = new Posts(req.user);
+  try {
+    let commentLikes = await obj._like_On_Comment(commentId);
+    return res.status(200).json({ message: commentLikes });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ error: err });
+  }
+});
+
+router.post("/unlikeonpost", getIdToken, async (req, res) => {
+  const { postId } = req.query;
+  const obj = new Posts(req.user);
+  try {
+    let unlikes = await obj._un_like_post(postId)
+    return res.status(200).json(unlikes);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ error: err });
+  }
+});
+router.post("/unlikeoncomment", getIdToken, async (req, res) => {
+  const { commentId } = req.query;
+  const obj = new Posts(req.user);
+  try {
+    let unlikes = await obj._un_like_comment(commentId)
+    return res.status(200).json(unlikes);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ error: err });
+  }
+});
 
 
 module.exports = router;

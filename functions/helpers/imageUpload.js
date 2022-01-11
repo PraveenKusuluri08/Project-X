@@ -46,7 +46,7 @@ const uploadImage = (req, res) => {
         },
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/fir-realworld-d5b34.appspot.com/o/${imageFileName}?alt=media`;
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/socialapp-f14f0.appspot.com/o/${imageFileName}?alt=media`;
         return db
           .collection("USERS")
           .doc(req.user.uid)
