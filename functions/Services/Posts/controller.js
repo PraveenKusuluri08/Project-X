@@ -127,5 +127,17 @@ router.post("/unlikeoncomment", getIdToken, async (req, res) => {
   }
 });
 
+router.delete("/deletepost",endPoint, async(req, res)=>{
+  const obj = new Posts(req.user)
+  const {postId}= req.query
+  try{
+    let deletePost=await obj._delete_post(postId)
+    return res.status(200).json(deletePost)
+  }catch(err){
+    console.log(err)
+    return res.status(404).json({err})
+  }
+})
+
 
 module.exports = router;
