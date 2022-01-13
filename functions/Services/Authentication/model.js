@@ -1,4 +1,4 @@
-const { admin, db } = require("../../utils/admin");
+const { admin, db, storage } = require("../../utils/admin");
 const AuthUtils = require("./utils");
 const { hashPassword } = require("../../helpers/utils");
 class Model {
@@ -50,32 +50,40 @@ class Model {
       const postsData = db.collection("POSTS").where("uid", "==", uid);
       const commentsRef = db.collection("COMMENT").where("uid", "==", uid);
       return AuthUtils._userExists(uid)
-        .then(() => {
-          admin
-            .auth()
-            .deleteUser(uid)
+        .then((data) => {
+          console.log(data);
+          let imageUrl = data.imageUrl.split("/")[7].split("?")[0];
+          return storage
+            .bucket()
+            .file(imageUrl)
+            .delete()
             .then(() => {
-              return db.collection("USERS").doc(uid).delete();
-            })
-            .then(() => {
-              return postsData.get().then((snap) => {
-                snap.forEach((doc) => {
-                  doc.ref.delete();
+              admin
+                .auth()
+                .deleteUser(uid)
+                .then(() => {
+                  return db.collection("USERS").doc(uid).delete();
+                })
+                .then(() => {
+                  return postsData.get().then((snap) => {
+                    snap.forEach((doc) => {
+                      doc.ref.delete();
+                    });
+                  });
+                })
+                .then(() => {
+                  return commentsRef.get().then((snap) => {
+                    snap.forEach(({ ref }) => {
+                      ref.delete();
+                    });
+                  });
+                })
+                .catch((err) => {
+                  console.log(err);
+                  reject("Failed to delete posts of user");
                 });
-              });
-            })
-            .then(() => {
-              return commentsRef.get().then((snap) => {
-                snap.forEach(({ref }) => {
-                  ref.delete();
-                });
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-              reject("Failed to delete posts of user");
+              resolve("User accout delete permanently");
             });
-          resolve("User accout delete permanently");
         })
         .catch((err) => {
           reject(err);

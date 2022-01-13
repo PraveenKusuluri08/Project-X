@@ -46,7 +46,7 @@ class Posts {
       likesCount: 0,
       commentsCount: 0,
       isExists: true,
-      uid:this.actionPerformer.uid
+      uid: this.actionPerformer.uid,
     };
     let postDb = db.collection("POSTS").doc();
     return postDb
@@ -246,7 +246,7 @@ class Posts {
             reject("Like post before unliking");
           } else {
             return db
-              .doc(`POST-LIKES/${snap.docs[0].data().id}`)
+              .doc(`POST-LIKES/${snap.docs[0].id}`)
               .delete()
               .then(() => {
                 postData.likesCount--;
@@ -289,7 +289,7 @@ class Posts {
             reject("Like comment before unliking");
           } else {
             return db
-              .doc(`COMMENT-LIKES/${snap.docs[0].data().id}`)
+              .doc(`COMMENT-LIKES/${snap.docs[0].id}`)
               .delete()
               .then(() => {
                 commentData.likesCount--;
@@ -305,6 +305,37 @@ class Posts {
         });
     });
   }
+
+  async _delete_post(postId) {
+    return new Promise((resolve, reject) => {
+      const postDb = db.collection("POSTS").doc(postId);
+      PostsUtils._is_posts_exists(postId)
+        .then((docs) => {
+          console.log(docs)
+          postDb
+            .delete()
+            .then(() => {
+              return db
+                .collection("COMMENT")
+                .where("postId", "==", postId)
+                .get()
+                .then((snap) => {
+                  return snap.forEach(({ ref }) => {
+                    ref.delete();
+                  });
+                });
+            })
+            .then(() => {
+              resolve("Post deleted successfully");
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+  
 }
 
 module.exports = Posts;
