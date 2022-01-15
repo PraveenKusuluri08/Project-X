@@ -3,6 +3,11 @@ const express = require("express");
 const cors = require("cors");
 const { commentIdUpdateTrigger } = require("./triggers/commentTriggers");
 const { onUserDeleteAccount } = require("./triggers/users/Users");
+const {
+  onPostLikes,
+  onCommentOnPost,
+  unLikeOnPost,
+} = require("./triggers/posts/posts");
 const app = express();
 
 app.use(cors({ origin: true }));
@@ -25,11 +30,31 @@ exports.commentId = functions.firestore
 exports.onUserDelete = functions.firestore
   .document("USERS/{uid}")
   .onDelete((snap, context) => {
-    onUserDeleteAccount(snap,context)
+    onUserDeleteAccount(snap, context);
   });
 
-//TODO:A trigger to delete automatically all the post likes comment likes when post deleted
+// exports.onPostDelete = functions.firestore
+// .document("POSTS/{postId}")
+// .onDelete((snap, context) => {
+//   onPostDelete(snap, context);
+// });
 
-// exports.deleteLikesOnPostDelete= functions.firestore
+//TODO:Trigger when the user likes post
 
-//TODO: HardDelete if users deletes their account delete their images stored in storage
+exports.notificationOnLike = functions.firestore
+  .document("POST-LIKES/{id}")
+  .onCreate((snap, context) => {
+    onPostLikes(snap);
+  });
+
+exports.notificationOnComment = functions.firestore
+  .document("COMMENT/{id}")
+  .onCreate((snap, context) => {
+    onCommentOnPost(snap);
+  });
+
+exports.userNotificationsOnCommentLikes = functions.firestore
+  .document("POST-LIKES/{id}")
+  .onDelete((snap, context) => {
+    unLikeOnPost(snap);
+  });
