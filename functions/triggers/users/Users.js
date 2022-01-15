@@ -1,9 +1,25 @@
-const {admin,db,storage} = require("../../utils/admin")
+const { db } = require("../../utils/admin");
 
-const onUserDeleteAccount=(snap,context)=>{
-    const {uid}= context.params
-    let usersRef = db.collection("USERS").doc(uid)
-    
-}
+const onUserDeleteAccount = async (snap, context) => {
+  const { uid } = context.params;
+  let usersRef = await db.collection("USERS").doc(uid).get();
+  const dbRef = db.collection("DELETE-USERS").doc(usersRef.email);
+  const usersData = await usersRef.data();
 
-module.exports={onUserDeleteAccount}
+  return dbRef
+    .set(
+      {
+        ...usersData,
+      },
+      { merge: true }
+    )
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+// const onPostDelete =(snap,context)=>{
+//     const {postId} = context.params
+// }
+
+module.exports = { onUserDeleteAccount };

@@ -54,7 +54,7 @@ router.delete("/user/deleteaccount", endPoint, async (req, res) => {
   try {
     let authDelete = await obj._deleteUserAccount();
     console.log(authDelete);
-    return res.status(200).json({ authDelete });
+    return res.status(200).json({message:authDelete });
   } catch (err) {
     console.log(err);
     return res.status(404).json(err);
