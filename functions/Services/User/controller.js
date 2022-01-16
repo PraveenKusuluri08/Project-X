@@ -1,12 +1,15 @@
 const router = require("express").Router();
 const { endPoint, getIdToken } = require("../../endpoint");
 const User = require("./model");
+
 router.put("/updateuser", endPoint, (req, res) => {
   //maintain last update details by that we can monitor the user login status
+  //and last login data to minitor the user status
   const inputsData = req.body;
   const obj = new User(req.user);
+  const {uid}= req.query
   return obj
-    .updateUserProfile(inputsData, req.user.uid)
+    .updateUserProfile(inputsData,uid)
     .then(() => {
       return res
         .status(200)

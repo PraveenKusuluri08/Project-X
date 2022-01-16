@@ -14,7 +14,7 @@ class User {
       lastUpdate: new Date().toISOString(),
     };
     console.log(this.actionPerformer);
-    let userDetails = reduceUserDetails(inputData);
+    // let userDetails = reduceUserDetails(inputData);
     return AuthUtils._userExists(userId)
       .then(() => {
         db.collection("USERS").doc(userId).update(updateData);

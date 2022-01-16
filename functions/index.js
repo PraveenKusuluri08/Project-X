@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
 const { commentIdUpdateTrigger } = require("./triggers/commentTriggers");
-const { onUserDeleteAccount } = require("./triggers/users/Users");
+const { onUserDeleteAccount,updateUserProfile} = require("./triggers/users/Users");
 const {
   onPostLikes,
   onCommentOnPost,
@@ -57,4 +57,10 @@ exports.userNotificationsOnCommentLikes = functions.firestore
   .document("POST-LIKES/{id}")
   .onDelete((snap, context) => {
     unLikeOnPost(snap);
+  });
+
+exports.onUserUpdate = functions.firestore
+  .document("USERS/{uid}")
+  .onUpdate((snap, context) => {
+    updateUserProfile(snap, context);
   });

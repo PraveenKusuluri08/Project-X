@@ -18,8 +18,27 @@ const onUserDeleteAccount = async (snap, context) => {
     });
 };
 
-// const onPostDelete =(snap,context)=>{
-//     const {postId} = context.params
-// }
+const updateUserProfile = (snap, context) => {
+  const { uid } = context.params;
 
-module.exports = { onUserDeleteAccount };
+  const after = snap.after.data();
+  const previous = snap.before.data();
+
+  if (previous !== after) {
+    db.collection("USERS")
+      .doc(uid)
+      .collection("Last-Update")
+      .add({
+        ...after,
+        updatedAt: new Date().toISOString(),
+      })
+      .then(() => {
+        return;
+      })
+      .catch((err) => {
+        console.log(err);
+        return err;
+      });
+  }
+};
+module.exports = { onUserDeleteAccount, updateUserProfile };
