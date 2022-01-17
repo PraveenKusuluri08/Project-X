@@ -1,6 +1,7 @@
 const { reduceUserDetails } = require("../../helpers/utils");
 const { db, storage, admin } = require("../../utils/admin");
 const AuthUtils = require("../Authentication/utils");
+const UserUtils = require("./utils");
 class User {
   constructor(user) {
     this.actionPerformer = user;
@@ -59,6 +60,22 @@ class User {
         postsData.forEach((post) => {
           user["posts"].push(post.data());
         });
+        return db
+          .collection("NOTIFICATIONS")
+          .where("sender", "==", this.actionPerformer.email)
+          .orderBy("createdAt", "desc")
+          .limit(10)
+          .get()
+          .then((data) => {
+            user["notifications"] = [];
+            data.forEach((doc) => {
+              user["notifications"].push({
+                ...doc.data(),
+              });
+            });
+          });
+      })
+      .then(() => {
         return user;
       })
       .catch((err) => {
@@ -88,6 +105,40 @@ class User {
       .catch((err) => {
         throw err;
       });
+  }
+
+  async getSeeTheUsersDataPublic(email) {
+    try {
+      let user = {};
+       UserUtils._isUserWithEmailExists(email)
+        .catch((err) => {
+          throw err;
+        })
+        .then((data) => {
+          user["user"] = data;
+        });
+
+      let promises = [];
+      let postsData = await db
+        .collection("POSTS")
+        .where("email", "==", email)
+        .get();
+      console.log(postsData);
+
+      user["posts"] = [];
+      postsData.forEach((doc) => {
+        user["posts"].push({
+          ...doc.data(),
+        });
+      });
+      promises.push(user);
+
+      return await Promise.all(promises);
+    } catch (err) {
+      console.log("err🤐", err);
+
+      throw err;
+    }
   }
 
   //TODO: soft delete of the user account
