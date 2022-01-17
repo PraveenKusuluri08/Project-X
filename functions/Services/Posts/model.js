@@ -311,20 +311,20 @@ class Posts {
       const postDb = db.collection("POSTS").doc(postId);
       PostsUtils._is_posts_exists(postId)
         .then((docs) => {
-          console.log(docs)
+          console.log(docs);
           postDb
             .delete()
-            .then(() => {
-              return db
-                .collection("COMMENT")
-                .where("postId", "==", postId)
-                .get()
-                .then((snap) => {
-                  return snap.forEach(({ ref }) => {
-                    ref.delete();
-                  });
-                });
-            })
+            // .then(() => {
+            //   return db
+            //     .collection("COMMENT")
+            //     .where("postId", "==", postId)
+            //     .get()
+            //     .then((snap) => {
+            //       return snap.forEach(({ ref }) => {
+            //         ref.delete();
+            //       });
+            //     });
+            // })
             .then(() => {
               resolve("Post deleted successfully");
             });
@@ -334,8 +334,23 @@ class Posts {
         });
     });
   }
+  async notificationReadMark(body) {
+    let batch = db.batch();
 
-  
+    body.forEach((notId) => {
+      const notification = db.collection("NOTIFICATIONS").doc(notId);
+      batch.update(notification, { read: true });
+    });
+    batch
+      .commit()
+      .then(() => {
+        return "Notification is read";
+      })
+      .catch((err) => {
+        console.log(err);
+        throw err;
+      });
+  }
 }
 
 module.exports = Posts;

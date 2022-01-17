@@ -45,6 +45,7 @@ class Model {
   //hard delete of the account
   async _deleteUserAccount() {
     return new Promise((resolve, reject) => {
+      //TODO:Optimize the code here as batch and run the delete trigger to delete the data in the firestore whenever this route invoked
       const { uid } = this.actionPerformer;
       console.log(uid);
       const postsData = db.collection("POSTS").where("uid", "==", uid);

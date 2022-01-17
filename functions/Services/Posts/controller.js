@@ -108,7 +108,7 @@ router.post("/unlikeonpost", getIdToken, async (req, res) => {
   const { postId } = req.query;
   const obj = new Posts(req.user);
   try {
-    let unlikes = await obj._un_like_post(postId)
+    let unlikes = await obj._un_like_post(postId);
     return res.status(200).json(unlikes);
   } catch (err) {
     console.log(err);
@@ -119,7 +119,7 @@ router.post("/unlikeoncomment", getIdToken, async (req, res) => {
   const { commentId } = req.query;
   const obj = new Posts(req.user);
   try {
-    let unlikes = await obj._un_like_comment(commentId)
+    let unlikes = await obj._un_like_comment(commentId);
     return res.status(200).json(unlikes);
   } catch (err) {
     console.log(err);
@@ -127,17 +127,29 @@ router.post("/unlikeoncomment", getIdToken, async (req, res) => {
   }
 });
 
-router.delete("/deletepost",endPoint, async(req, res)=>{
-  const obj = new Posts(req.user)
-  const {postId}= req.query
-  try{
-    let deletePost=await obj._delete_post(postId)
-    return res.status(200).json(deletePost)
-  }catch(err){
-    console.log(err)
-    return res.status(404).json({err})
+router.delete("/deletepost", endPoint, async (req, res) => {
+  const obj = new Posts(req.user);
+  const { postId } = req.query;
+  try {
+    let deletePost = await obj._delete_post(postId);
+    return res.status(200).json(deletePost);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ err });
   }
-})
+});
 
+router.post("/notifications", getIdToken, (req, res) => {
+  const obj = new Posts(req.user);
+  obj
+    .notificationReadMark(req.body)
+    .then((msg) => {
+      return res.status(200).json(msg);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(404).json(err);
+    });
+});
 
 module.exports = router;
