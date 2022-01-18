@@ -84,14 +84,19 @@ class User {
   }
 
   async deleteProfilePic(filename) {
-    let dbRef = db.collection("USERS").doc(this.actionPerformer.uid);
-    return dbRef
-      .update({
-        imageUrl: this.fieldValue.delete(),
+    new Promise((resolve, reject) =>{
+
+      let dbRef = db.collection("USERS").doc(this.actionPerformer.uid);
+      if(filename!=="cover.jpg")
+        return dbRef
+        .update({
+          imageUrl: this.fieldValue.delete(),
       })
       .then((ref) => {
         console.log("ref", ref);
+        if(filename!=="cover.jpg")
         return storage.bucket().file(filename).delete();
+        else return
       })
       .then(() => {
         const startImage = "cover.jpg";
@@ -101,12 +106,16 @@ class User {
           },
           { merge: true }
         );
+      }).then(()=>{
+
       })
       .catch((err) => {
-        throw err;
+        reject("Failed to delete image")
       });
+    
+  })
   }
-
+  
   async getSeeTheUsersDataPublic(email) {
     try {
       let user = {};

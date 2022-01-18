@@ -41,4 +41,23 @@ const updateUserProfile = (snap, context) => {
       });
   }
 };
-module.exports = { onUserDeleteAccount, updateUserProfile };
+
+const onProfileChange = (snap) => {
+  if (snap.before.data().imageUrl !== snap.after.data().imageUrl) {
+    const batch = db.batch();
+    return db
+      .collection("POSTS")
+      .where("email", "==", snap.before.data().email)
+      .get()
+      .then((data) => {
+        data.forEach((doc) => {
+          const post = db.collection("POSTS").doc(doc.id);
+          batch.update(post, { imageUrl: snap.after.data().imageUrl });
+        });
+        return batch.commit();
+      });
+  } else {
+    return true;
+  }
+};
+module.exports = { onUserDeleteAccount, updateUserProfile, onProfileChange };
