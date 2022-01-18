@@ -5,6 +5,7 @@ const { commentIdUpdateTrigger } = require("./triggers/commentTriggers");
 const {
   onUserDeleteAccount,
   updateUserProfile,
+  onProfileChange,
 } = require("./triggers/users/Users");
 const {
   onPostLikes,
@@ -73,4 +74,10 @@ exports.onPostDelete = functions.firestore
   .document("POSTS/{postId}")
   .onDelete((snap, context) => {
     onPostDelete(snap, context);
+  });
+
+exports.onUserPrifilePicChange = functions.firestore
+  .document("USERS/{uid}")
+  .onUpdate((snap, context) => {
+    onProfileChange(snap);
   });

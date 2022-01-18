@@ -5,7 +5,7 @@ const onPostLikes = (snap) => {
     .doc(snap.data().postId)
     .get()
     .then((doc) => {
-      if (doc.exists) {
+      if (doc.exists && doc.data().email!==snap.data().email) {
         const schema = {
           createdAt: new Date().toISOString(),
           reciever: doc.data().email,
@@ -39,7 +39,7 @@ const onCommentOnPost = (snap) => {
     .doc(snap.data().postId)
     .get()
     .then((doc) => {
-      if (doc.exists) {
+      if (doc.exists && doc.data().email!==snap.data().email) {
         const schema = {
           createdAt: new Date().toISOString(),
           reciever: doc.data().email,

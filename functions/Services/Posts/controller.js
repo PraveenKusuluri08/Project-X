@@ -139,17 +139,19 @@ router.delete("/deletepost", endPoint, async (req, res) => {
   }
 });
 
-router.post("/notifications", getIdToken, (req, res) => {
+router.post("/notifications", getIdToken,async (req, res) => {
   const obj = new Posts(req.user);
-  obj
+  console.log(req.body)
+  try{
+
+    let notifications=await obj
     .notificationReadMark(req.body)
-    .then((msg) => {
-      return res.status(200).json(msg);
-    })
-    .catch((err) => {
+    console.log(notifications)
+    return res.status(200).json({message:"Notifications read!"})
+  }catch(err){
       console.log(err);
       return res.status(404).json(err);
-    });
-});
+    }
+  })
 
 module.exports = router;

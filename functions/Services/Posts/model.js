@@ -121,8 +121,6 @@ class Posts {
       });
   }
 
-  //TODO:Run a background trigger when someone likes on the post
-
   async _like_On_Post(postId) {
     return new Promise((reslove, reject) => {
       const likes = db
@@ -335,22 +333,26 @@ class Posts {
     });
   }
   async notificationReadMark(body) {
-    let batch = db.batch();
+    new Promise((resolve, reject) => {
 
-    body.forEach((notId) => {
-      const notification = db.collection("NOTIFICATIONS").doc(notId);
-      batch.update(notification, { read: true });
-    });
-    batch
+      let batch = db.batch();
+      
+      body.forEach((notId) => {
+        console.log(notId)
+        const notification = db.collection("NOTIFICATIONS").doc(notId);
+        batch.update(notification, { read: true });
+      });
+      batch
       .commit()
       .then(() => {
-        return "Notification is read";
+        return resolve("Notification is read")
       })
       .catch((err) => {
         console.log(err);
-        throw err;
+        reject(err)
       });
-  }
+    })
+    }
 }
 
 module.exports = Posts;
