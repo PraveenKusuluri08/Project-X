@@ -13,15 +13,31 @@ const {
   unLikeOnPost,
   onPostDelete,
 } = require("./triggers/posts/posts");
+const { endPoint } = require("./endpoint");
+const { fileUploadScaled } = require("./helpers/imageUpload");
 const app = express();
+const fileupload= require("express-fileupload")
+const bodyParser = require("body-parser")
+app.use(fileupload())
 
 app.use(cors({ origin: true }));
+
+app.use(express.json())
+app.use(bodyParser.urlencoded({ extended: true })); 
 
 app.use("/auth", require("./Services/Authentication/controller"));
 
 app.use("/user", require("./Services/User/controller"));
 
 app.use("/posts", require("./Services/Posts/controller"));
+
+app.post("/imageUploadScale",endPoint,fileUploadScaled)
+
+app.post("upload",(req,res)=>{
+  const file = req.files
+  console.log(file)
+})
+ 
 
 exports.api = functions.https.onRequest(app);
 
