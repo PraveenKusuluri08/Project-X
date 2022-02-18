@@ -5,7 +5,7 @@ const {
   checkUpdateFieldsIsEmpty,
 } = require("../../helpers/utils");
 const { endPoint } = require("../../endpoint");
-const uploadImage = require("../../helpers/imageUpload");
+const {uploadImage, fileUploadScaled} = require("../../helpers/imageUpload");
 
 //signUp
 
@@ -47,6 +47,9 @@ router.post("/createuser", (req, res) => {
 //upload image
 
 router.post("/user/uploadimage", endPoint, uploadImage);
+
+//TODO:Scalable image upload to the storage trils
+router.post("/user/uploadimagescale",endPoint,fileUploadScaled)
 
 router.delete("/user/deleteaccount", endPoint, async (req, res) => {
 
