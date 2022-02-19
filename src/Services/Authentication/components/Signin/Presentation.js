@@ -1,6 +1,6 @@
 import React from "react";
 
-function Presentation({ state, handleChange, handleSubmit }) {
+function Presentation({ state, handleChange, handleSubmit,password }) {
   return (
     <div>
         <form onSubmit={handleSubmit} className="shadow-2xl p-4 max-w-md mx-auto bg-white border-t-8 border-indigo-700 mt-10 rounded">
@@ -55,7 +55,7 @@ function Presentation({ state, handleChange, handleSubmit }) {
                 className="bg-gray-300 hover:bg-gray-400 rounded px-2 py-1 text-sm text-gray-600 font-mono cursor-pointer js-password-label"
                 for="toggle"
                 >
-                show
+                {password.length?password:"Show"}
               </label>
             </div>
             <input

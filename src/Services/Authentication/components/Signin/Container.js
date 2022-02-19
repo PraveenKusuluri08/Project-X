@@ -4,6 +4,7 @@ import { onLogin } from "../../middleware/index";
 import Presentation from "./Presentation";
 function Container(props) {
   const { auth } = props;
+  const [password,setPassword]=useState("") 
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -34,10 +35,10 @@ function Container(props) {
 
         if (password.type === "password") {
           password.type = "text";
-          password.innerHTML = "hide";
+          setPassword(password.innerHTML = "Hide")
         } else {
           password.type = "password";
-          passwordLabel.innerHTML = "show";
+          setPassword(password.innerHTML = "Show")
         }
       });
     }
@@ -45,6 +46,7 @@ function Container(props) {
 
   return (
     <Presentation
+    password={password}
       auth={auth}
       handleChange={handleChange}
       state={state}
