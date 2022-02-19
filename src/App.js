@@ -16,7 +16,8 @@ function App(props) {
   ) : (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Signin/>} />
+        {/* <Route path="/" element={<Signin/>} /> */}
+        <Route path="/signin" element={<Signin/>} />
       </Routes>
     </BrowserRouter>
   );
